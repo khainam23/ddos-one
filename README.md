@@ -1,230 +1,192 @@
-# 🚀 NUCLEAR LOAD TESTER
+# 🥷 Stealth DDoS - Anti-Detection Tool
 
-Công cụ kiểm tra tải (load testing) mạnh mẽ với khả năng tạo ra hàng nghìn request đồng thời để kiểm tra khả năng chịu tải của web server.
+Tool DDoS với các tính năng chống phát hiện và tránh bị block IP.
 
-## ⚠️ CẢNH BÁO QUAN TRỌNG
+## ✨ Tính năng chính
 
-**CHỈ SỬ DỤNG TRÊN:**
-- Server/website mà bạn sở hữu
-- Môi trường test/development
-- Với sự cho phép rõ ràng từ chủ sở hữu
+### 🛡️ Anti-Detection Features
+- **Proxy Rotation**: Tự động xoay proxy để thay đổi IP
+- **User-Agent Rotation**: Xoay User-Agent để giả mạo trình duyệt
+- **IP Header Spoofing**: Giả mạo IP thông qua headers (X-Forwarded-For, X-Real-IP, etc.)
+- **Random Delays**: Thêm delay ngẫu nhiên để tránh pattern detection
+- **Header Randomization**: Random hóa tất cả headers
+- **Path Randomization**: Random attack paths
+- **Method Randomization**: Random HTTP methods
 
-**KHÔNG SỬ DỤNG ĐỂ:**
-- Tấn công website của người khác
-- Làm gián đoạn dịch vụ trái phép
-- Vi phạm pháp luật
+### 🚀 Performance Features
+- **Multi-threading**: Sync + Async threads
+- **Connection Pooling**: Tái sử dụng kết nối
+- **Configurable Parameters**: Dễ dàng điều chỉnh
 
-## 🔥 TÍNH NĂNG
+### 📊 Monitoring Features
+- **Real-time Statistics**: Theo dõi RPS, success rate
+- **Detailed Logging**: Log chi tiết với proxy info
+- **Success Rate Tracking**: Theo dõi tỷ lệ thành công
 
-### 💥 NUCLEAR ATTACK MODE
-- **Multi-Process Architecture**: Tận dụng tất cả CPU cores
-- **200 Synchronous Threads**: Không có delay giữa các request
-- **20 Asynchronous Threads**: Mỗi thread xử lý 50 request đồng thời
-- **Multi-HTTP Methods**: GET, POST, HEAD, OPTIONS
-- **Multiple Attack Paths**: 12 đường dẫn khác nhau
-- **Random Headers**: 8 User-Agent khác nhau (desktop + mobile)
-- **Cache Busting**: Tham số ngẫu nhiên để bypass cache
+## 📁 File Structure
 
-### 📊 THỐNG KÊ REAL-TIME
-- Requests Per Second (RPS)
-- Tổng số request đã gửi
-- Thời gian chạy
-- Peak performance tracking
-
-## 🛠️ CÀI ĐẶT
-
-### Yêu cầu hệ thống
-- Python 3.7+
-- Windows/Linux/macOS
-- RAM: Tối thiểu 4GB (khuyến nghị 8GB+)
-- CPU: Multi-core (càng nhiều core càng mạnh)
-
-### Cài đặt dependencies
-```bash
-pip install requests aiohttp
+```
+ddos/
+├── stealth_ddos.py      # Main attack script (phiên bản mới)
+├── index.py             # Original script (đã cập nhật)
+├── config.py            # Configuration file
+├── proxy_fetcher.py     # Proxy management
+├── app.py              # Web interface
+├── install_requirements.py # Dependency installer
+└── README.md           # This file
 ```
 
-### Tải code
+## 🚀 Quick Start
+
+### 1. Cài đặt dependencies
 ```bash
-git clone <repository-url>
-cd ddos
+python install_requirements.py
 ```
 
-## 🚀 CÁCH SỬ DỤNG
-
-### 1. Cấu hình target
-Mở file `index.py` và chỉnh sửa:
+### 2. Cấu hình target
+Chỉnh sửa `config.py`:
 ```python
-TARGET_URL = "https://your-website.com/"  # Thay bằng URL của bạn
+TARGET_URL = "https://your-target.com/"
 ```
 
-### 2. Tùy chỉnh cường độ (tùy chọn)
-```python
-NUM_THREADS = 200          # Số thread đồng bộ
-ASYNC_THREADS = 20         # Số thread bất đồng bộ  
-CONCURRENT_REQUESTS = 50   # Request đồng thời mỗi async thread
-```
-
-### 3. Chạy chương trình
+### 3. Chạy attack
 ```bash
+# Phiên bản mới (khuyến nghị)
+python stealth_ddos.py
+
+# Hoặc phiên bản cũ đã cập nhật
 python index.py
 ```
 
-### 4. Dừng chương trình
-Nhấn **Ctrl+C** để dừng an toàn
-
-## 📈 HIỂU KẾT QUẢ
-
-### Thống kê hiển thị
-```
-💥 NUCLEAR STATS: 15420 requests | RPS: 1250 | Time: 12.3s | 🔥ATTACKING🔥
-```
-
-- **requests**: Tổng số request đã gửi
-- **RPS**: Requests Per Second (request/giây)
-- **Time**: Thời gian đã chạy
-
-### Kết quả cuối cùng
-```
-💀 NUCLEAR ATTACK COMPLETED 💀
-   Total Requests Fired: 25680
-   Total Attack Time: 20.50 seconds
-   Average RPS: 1252.68
-   Peak Performance: 1450.00 RPS
-```
-
-## ⚙️ TÙY CHỈNH NÂNG CAO
-
-### Thay đổi cường độ tấn công
-```python
-# Cường độ thấp (testing nhẹ)
-NUM_THREADS = 10
-ASYNC_THREADS = 2
-CONCURRENT_REQUESTS = 10
-
-# Cường độ trung bình
-NUM_THREADS = 50
-ASYNC_THREADS = 5
-CONCURRENT_REQUESTS = 20
-
-# Cường độ cao (NUCLEAR MODE)
-NUM_THREADS = 200
-ASYNC_THREADS = 20
-CONCURRENT_REQUESTS = 50
-```
-
-### Thêm đường dẫn tấn công
-```python
-ATTACK_PATHS = [
-    '/',
-    '/your-custom-path',
-    '/api/endpoint',
-    # Thêm các path khác...
-]
-```
-
-### Thêm User-Agent
-```python
-USER_AGENTS = [
-    'Your-Custom-User-Agent/1.0',
-    # Thêm các User-Agent khác...
-]
-```
-
-## 🔧 TROUBLESHOOTING
-
-### Lỗi thường gặp
-
-**1. "ModuleNotFoundError: No module named 'aiohttp'"**
+### 4. Sử dụng Web Interface
 ```bash
-pip install aiohttp
+python app.py
+```
+Truy cập: http://localhost:5000
+
+## ⚙️ Configuration
+
+### Cấu hình cơ bản trong `config.py`:
+
+```python
+# Target
+TARGET_URL = "https://example.com/"
+
+# Performance
+NUM_THREADS = 30          # Số sync threads
+ASYNC_THREADS = 8         # Số async threads
+CONCURRENT_REQUESTS = 15  # Requests per async thread
+
+# Anti-Detection
+USE_PROXIES = True        # Bật proxy rotation
+USE_DELAYS = True         # Bật random delays
+ROTATE_IP_HEADERS = True  # Bật IP spoofing
+USE_FRESH_PROXIES = True  # Tự động lấy proxy mới
+
+# Delays
+MIN_DELAY = 0.2          # Delay tối thiểu (giây)
+MAX_DELAY = 3.0          # Delay tối đa (giây)
 ```
 
-**2. "Too many open files"**
-- Giảm `NUM_THREADS` và `CONCURRENT_REQUESTS`
-- Tăng file descriptor limit (Linux/macOS)
+## 🔧 Advanced Usage
 
-**3. "Connection timeout"**
-- Target server có thể đã quá tải
-- Tăng timeout trong code nếu cần
+### Proxy Management
+```python
+from proxy_fetcher import update_proxy_list, load_saved_proxies
 
-**4. RPS thấp**
-- Kiểm tra kết nối internet
-- Target server có thể có rate limiting
-- Thử giảm timeout
+# Lấy proxy mới từ internet
+fresh_proxies = update_proxy_list()
 
-### Tối ưu hiệu suất
+# Load proxy đã lưu
+saved_proxies = load_saved_proxies()
+```
 
-**Tăng RPS:**
-- Tăng `NUM_THREADS`
-- Tăng `CONCURRENT_REQUESTS`
-- Giảm timeout
-- Sử dụng máy có nhiều CPU core
+### Custom Headers
+Chỉnh sửa `USER_AGENTS`, `REFERERS`, `ACCEPT_LANGUAGES` trong `config.py`
 
-**Giảm tải hệ thống:**
-- Giảm `NUM_THREADS`
-- Giảm `CONCURRENT_REQUESTS`
-- Thêm delay giữa các request
+### Performance Tuning
+- Tăng `NUM_THREADS` cho nhiều requests hơn
+- Giảm `MIN_DELAY`/`MAX_DELAY` cho tốc độ cao hơn
+- Tắt `USE_DELAYS` để tốc độ tối đa (rủi ro cao)
 
-## 📊 BENCHMARK
+## 🛡️ Anti-Detection Strategies
 
-### Hiệu suất tham khảo
-| CPU Cores | RAM | Typical RPS | Max RPS |
-|-----------|-----|-------------|---------|
-| 4 cores   | 8GB | 800-1200   | 2000    |
-| 8 cores   | 16GB| 1500-2500  | 4000    |
-| 16 cores  | 32GB| 3000-5000  | 8000+   |
+### 1. IP Rotation
+- Sử dụng proxy để thay đổi IP
+- Tự động refresh proxy list
+- Fallback to backup proxies
 
-*Kết quả thực tế phụ thuộc vào target server và kết nối mạng*
+### 2. Traffic Mimicking
+- Random User-Agents (Chrome, Firefox, Safari, Mobile)
+- Random Accept-Language headers
+- Random Referer headers
+- Realistic request patterns
 
-## 🛡️ BẢO MẬT & PHÁP LÝ
+### 3. Timing Randomization
+- Random delays between requests
+- Random delays between batches
+- Avoid predictable patterns
 
-### Sử dụng hợp pháp
-- ✅ Kiểm tra server của bạn
-- ✅ Môi trường development/staging
-- ✅ Có permission từ chủ sở hữu
-- ✅ Penetration testing hợp pháp
+### 4. Header Spoofing
+- X-Forwarded-For manipulation
+- X-Real-IP spoofing
+- Multiple IP header combinations
 
-### Không được phép
-- ❌ Tấn công website người khác
-- ❌ DDoS attack
-- ❌ Làm gián đoạn dịch vụ
-- ❌ Vi phạm Terms of Service
+## 📊 Monitoring
 
-### Trách nhiệm
-Người sử dụng hoàn toàn chịu trách nhiệm về việc sử dụng công cụ này. Tác giả không chịu trách nhiệm về bất kỳ thiệt hại nào.
+### Real-time Stats
+```
+📈 Total: 1250 | RPS: 45.2 | Success: 87.3% | Errors: 12.7% | Time: 28.5s
+```
 
-## 🤝 ĐÓNG GÓP
+### Log Format
+```
+🔥 #1240 | GET /index.php | 200 | Success: 87.1% via http://proxy:8080
+⚡ Async #1241 | /login | 403 | Success: 87.0%
+```
 
-### Báo lỗi
-- Tạo issue trên GitHub
-- Mô tả chi tiết lỗi và môi trường
+## ⚠️ Important Notes
 
-### Đề xuất tính năng
-- Fork repository
-- Tạo pull request
-- Mô tả rõ tính năng mới
+### Legal Disclaimer
+- Chỉ sử dụng trên hệ thống bạn sở hữu hoặc có permission
+- Tool này chỉ for educational purposes
+- Tác giả không chịu tr책nhiệm cho việc sử dụng sai mục đích
 
-## 📝 CHANGELOG
+### Performance Tips
+- Bắt đầu với settings thấp và tăng dần
+- Monitor success rate - nếu quá thấp thì giảm intensity
+- Sử dụng fresh proxies cho hiệu quả tốt nhất
 
-### v2.0 - NUCLEAR MODE
-- ✨ Multi-process architecture
-- ✨ Multiple HTTP methods
-- ✨ Multiple attack paths
-- ✨ Enhanced connection pooling
-- ✨ Real-time statistics
-- 🔧 Improved error handling
-- 🔧 Better performance optimization
+### Troubleshooting
+- Nếu success rate thấp: tăng delays, giảm threads
+- Nếu không có proxy: tắt `USE_PROXIES` hoặc update proxy list
+- Nếu bị block: tăng delays, enable tất cả anti-detection features
 
-### v1.0 - Initial Release
-- ✨ Basic multi-threading
-- ✨ Random headers
-- ✨ Basic statistics
+## 🔄 Updates
 
-## 📄 LICENSE
+### Version 2.0 (Stealth)
+- ✅ Proxy rotation with auto-refresh
+- ✅ Enhanced header randomization
+- ✅ IP spoofing via headers
+- ✅ Configurable delays
+- ✅ Better error handling
+- ✅ Real-time statistics
+- ✅ Success rate tracking
 
-MIT License - Xem file LICENSE để biết chi tiết.
+### Version 1.0 (Original)
+- ✅ Basic multi-threading
+- ✅ User-Agent rotation
+- ✅ Multiple HTTP methods
+- ✅ Path randomization
+
+## 🤝 Contributing
+
+Feel free to contribute improvements, especially:
+- New proxy sources
+- Better anti-detection methods
+- Performance optimizations
+- Bug fixes
 
 ---
 
-**⚠️ Nhớ: Sức mạnh lớn đi kèm trách nhiệm lớn. Sử dụng có trách nhiệm!**
+**Remember**: Use responsibly and only on systems you own or have explicit permission to test! 🛡️

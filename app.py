@@ -3,6 +3,9 @@ import csv
 import os
 from urllib.parse import urlparse
 import re
+import threading
+import time
+from ddos_manager import ddos_manager
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
@@ -142,7 +145,7 @@ def add_url():
 
 @app.route('/toggle_status', methods=['POST'])
 def toggle_status():
-    """Thay đổi status của URL"""
+    """Thay đổi status của URL và tự động chạy/dừng DDoS"""
     data = request.get_json()
     url = data.get('url')
     status = data.get('status')
@@ -150,24 +153,73 @@ def toggle_status():
     if not url:
         return jsonify({'success': False, 'message': 'URL không hợp lệ'})
     
-    # Nếu đang bật status=true, tắt tất cả URL khác
-    if status:
-        urls = get_all_urls()
-        for u in urls:
-            if u['url'] != url:
-                update_url_status(u['url'], False)
-    
-    update_url_status(url, status)
-    
-    # Cập nhật TARGET_URL trong index.py nếu có URL active
-    if status:
-        success = update_target_url_in_index()
-        if success:
-            return jsonify({'success': True, 'message': 'Cập nhật thành công! TARGET_URL đã được thay đổi trong index.py'})
+    try:
+        # Nếu đang bật status=true, tắt tất cả URL khác và dừng DDoS hiện tại
+        if status:
+            # Dừng DDoS hiện tại nếu có
+            if ddos_manager.is_running:
+                ddos_manager.stop_attack()
+                time.sleep(1)  # Đợi dừng hoàn toàn
+            
+            # Tắt tất cả URL khác
+            urls = get_all_urls()
+            for u in urls:
+                if u['url'] != url:
+                    update_url_status(u['url'], False)
+            
+            # Bật URL hiện tại
+            update_url_status(url, True)
+            
+            # Cập nhật TARGET_URL trong các file config
+            update_target_url_in_index()
+            
+            # Bắt đầu DDoS attack cho URL mới
+            success = ddos_manager.start_attack(url)
+            
+            if success:
+                return jsonify({
+                    'success': True, 
+                    'message': f'🚀 DDoS attack đã bắt đầu cho {url}!',
+                    'ddos_status': 'started'
+                })
+            else:
+                return jsonify({
+                    'success': True, 
+                    'message': f'URL đã được kích hoạt nhưng không thể khởi động DDoS attack',
+                    'ddos_status': 'failed'
+                })
         else:
-            return jsonify({'success': True, 'message': 'Cập nhật status thành công nhưng không thể cập nhật index.py'})
-    
-    return jsonify({'success': True, 'message': 'Cập nhật status thành công!'})
+            # Tắt URL và dừng DDoS
+            update_url_status(url, False)
+            
+            # Dừng DDoS nếu URL này đang được attack
+            if ddos_manager.is_running and ddos_manager.current_target == url:
+                success = ddos_manager.stop_attack()
+                if success:
+                    return jsonify({
+                        'success': True, 
+                        'message': f'🛑 DDoS attack đã dừng cho {url}',
+                        'ddos_status': 'stopped'
+                    })
+                else:
+                    return jsonify({
+                        'success': True, 
+                        'message': f'URL đã được tắt nhưng không thể dừng DDoS attack',
+                        'ddos_status': 'failed'
+                    })
+            else:
+                return jsonify({
+                    'success': True, 
+                    'message': 'URL đã được tắt',
+                    'ddos_status': 'inactive'
+                })
+                
+    except Exception as e:
+        return jsonify({
+            'success': False, 
+            'message': f'Lỗi: {str(e)}',
+            'ddos_status': 'error'
+        })
 
 @app.route('/delete', methods=['POST'])
 def delete_url():
@@ -193,6 +245,53 @@ def delete_url():
         writer.writerows(urls)
     
     return jsonify({'success': True, 'message': 'Xóa URL thành công!'})
+
+@app.route('/ddos_status')
+def ddos_status():
+    """API để lấy trạng thái DDoS hiện tại"""
+    status = ddos_manager.get_status()
+    process_info = ddos_manager.get_process_info()
+    
+    return jsonify({
+        'ddos_running': status['running'],
+        'target_url': status['target'],
+        'uptime': status['uptime'],
+        'pid': status['pid'],
+        'process_info': process_info
+    })
+
+@app.route('/stop_ddos', methods=['POST'])
+def stop_ddos():
+    """API để dừng DDoS attack"""
+    try:
+        if ddos_manager.is_running:
+            success = ddos_manager.stop_attack()
+            if success:
+                # Tắt tất cả URL active
+                urls = get_all_urls()
+                for u in urls:
+                    if u['status']:
+                        update_url_status(u['url'], False)
+                
+                return jsonify({
+                    'success': True,
+                    'message': '🛑 DDoS attack đã được dừng'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': 'Không thể dừng DDoS attack'
+                })
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'Không có DDoS attack nào đang chạy'
+            })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Lỗi: {str(e)}'
+        })
 
 if __name__ == '__main__':
     init_csv()

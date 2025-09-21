@@ -308,6 +308,19 @@
         <div class="header">
             <h1>🎯 URL Manager</h1>
             <p>Quản lý danh sách URL cho DDoS Tool - Chỉ một URL có thể active tại một thời điểm</p>
+            
+            <!-- DDoS Status Panel -->
+            <div id="ddos-status-panel" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span id="ddos-status-text">🔍 Checking DDoS status...</span>
+                        <div id="ddos-details" style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;"></div>
+                    </div>
+                    <button id="emergency-stop" class="btn btn-danger" onclick="emergencyStop()" style="display: none;">
+                        🚨 Emergency Stop
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="add-form">
@@ -497,6 +510,78 @@
             }
         }
 
+        // DDoS Status Management
+        async function checkDDoSStatus() {
+            try {
+                const response = await fetch('/ddos_status');
+                const data = await response.json();
+                
+                const statusText = document.getElementById('ddos-status-text');
+                const statusDetails = document.getElementById('ddos-details');
+                const emergencyStop = document.getElementById('emergency-stop');
+                
+                if (data.ddos_running) {
+                    statusText.innerHTML = `🚀 <strong>DDoS ACTIVE</strong>`;
+                    statusDetails.innerHTML = `Target: ${data.target_url}<br>Uptime: ${formatUptime(data.uptime)}<br>PID: ${data.pid}`;
+                    emergencyStop.style.display = 'block';
+                } else {
+                    statusText.innerHTML = `⚫ <strong>DDoS INACTIVE</strong>`;
+                    statusDetails.innerHTML = `No active attack`;
+                    emergencyStop.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking DDoS status:', error);
+                document.getElementById('ddos-status-text').innerHTML = `❌ <strong>STATUS ERROR</strong>`;
+                document.getElementById('ddos-details').innerHTML = `Cannot connect to server`;
+            }
+        }
+        
+        function formatUptime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m ${secs}s`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${secs}s`;
+            } else {
+                return `${secs}s`;
+            }
+        }
+        
+        async function emergencyStop() {
+            if (!confirm('Bạn có chắc chắn muốn dừng DDoS attack ngay lập tức?')) {
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch('/stop_ddos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Có lỗi xảy ra khi dừng DDoS!', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
         // Tự động ẩn alerts sau 5 giây
         document.addEventListener('DOMContentLoaded', function() {
             const alerts = document.querySelectorAll('.alert');
@@ -509,6 +594,12 @@
                     }, 300);
                 }, 5000);
             });
+            
+            // Kiểm tra trạng thái DDoS ngay khi load trang
+            checkDDoSStatus();
+            
+            // Cập nhật trạng thái DDoS mỗi 3 giây
+            setInterval(checkDDoSStatus, 3000);
         });
     </script>
 </body>
